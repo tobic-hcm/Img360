@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi Image 360 Viewer</title>
+  <title>360 Image Viewer</title>
   <style>
-    body { margin: 0; overflow: hidden; }
+    body { margin: 0; }
     canvas { display: block; }
   </style>
 </head>
@@ -20,48 +20,32 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Add OrbitControls for interaction
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true; // Smooth controls
-    controls.dampingFactor = 0.05;
-
-    // Camera initial position
-    camera.position.set(0, 0, 5);
-
-    // Add a sphere background
+    // Load texture (replace 'your-360-image.jpg' with your image path)
     const textureLoader = new THREE.TextureLoader();
-    const backgroundTexture = textureLoader.load('your-360-background.jpg'); // Replace with a 360-degree background image
+    const texture = textureLoader.load('your-360-image.jpg');
+
+    // Create sphere geometry for the 360 image
     const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
-    sphereGeometry.scale(-1, 1, 1); // Flip sphere inside-out
-    const sphereMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture });
+    sphereGeometry.scale(-1, 1, 1); // Invert the sphere to look from the inside
+    const sphereMaterial = new THREE.MeshBasicMaterial({ map: texture });
     const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
     scene.add(sphere);
 
-    // Function to add images in 3D space
-    function addImage(position, imageURL, size = 1) {
-      const imageTexture = textureLoader.load(imageURL);
-      const planeGeometry = new THREE.PlaneGeometry(size, size);
-      const planeMaterial = new THREE.MeshBasicMaterial({ map: imageTexture, transparent: true });
-      const imagePlane = new THREE.Mesh(planeGeometry, planeMaterial);
-      imagePlane.position.set(position.x, position.y, position.z);
-      scene.add(imagePlane);
-    }
+    // Camera position
+    camera.position.set(0, 0, 0.1);
 
-    // Add multiple images with positions
-    addImage({ x: 0, y: 2, z: -4 }, 'image1.jpg', 2); // Replace 'image1.jpg'
-    addImage({ x: 3, y: 0, z: -4 }, 'image2.jpg', 2); // Replace 'image2.jpg'
-    addImage({ x: -3, y: 0, z: -4 }, 'image3.jpg', 2); // Replace 'image3.jpg'
-    addImage({ x: 0, y: -2, z: -4 }, 'image4.jpg', 2); // Replace 'image4.jpg'
+    // Add OrbitControls
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableZoom = false;
 
-    // Animation loop
+    // Render loop
     function animate() {
       requestAnimationFrame(animate);
-      controls.update();
       renderer.render(scene, camera);
     }
     animate();
 
-    // Adjust on window resize
+    // Handle window resize
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
